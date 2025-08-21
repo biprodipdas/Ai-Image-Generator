@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile - Imagina AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body id="body" class="flex items-center justify-center min-h-screen bg-gray-100 transition">
+
+  <div class="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-lg w-[400px] text-center transition">
+    <!-- Profile Image -->
+    <div class="relative inline-block">
+      <img id="profileImage" src="https://via.placeholder.com/120" 
+           class="w-28 h-28 rounded-full border-4 border-indigo-500 mx-auto object-cover">
+      <label for="uploadImage" 
+             class="absolute bottom-2 right-2 bg-indigo-600 text-white p-1 rounded-full cursor-pointer hover:bg-indigo-700">
+        ✏
+      </label>
+      <input type="file" id="uploadImage" accept="image/*" class="hidden">
+    </div>
+
+    <!-- User Info -->
+    <h2 class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-4" id="userName">User Name</h2>
+    <p class="text-gray-600 dark:text-gray-300" id="userEmail">user@email.com</p>
+
+    <!-- Edit Info -->
+    <div class="mt-6 text-left">
+      <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-2">Edit Info</h3>
+      <form id="editForm" class="space-y-3">
+        <input type="text" id="editName" placeholder="Change Name" 
+               class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+        <input type="email" id="editEmail" placeholder="Change Email" 
+               class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+        <button type="submit" 
+                class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700">Save Changes</button>
+      </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="mt-6 text-left">
+      <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-2">Change Password</h3>
+      <form id="passwordForm" class="space-y-3">
+        <input type="password" id="oldPassword" placeholder="Old Password" 
+               class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+        <input type="password" id="newPassword" placeholder="New Password" 
+               class="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+        <button type="submit" 
+                class="w-full bg-yellow-500 text-white py-2 rounded-lg hover:bg-yellow-600">Update Password</button>
+      </form>
+    </div>
+
+    <!-- Dark Mode Toggle -->
+    <div class="mt-6 flex justify-between items-center">
+      <span class="text-gray-700 dark:text-gray-200">🌙 Dark Mode</span>
+      <label class="switch relative inline-block w-12 h-6">
+        <input type="checkbox" id="darkToggle" class="hidden">
+        <span class="slider round absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-400 rounded-full transition"></span>
+      </label>
+    </div>
+
+    <!-- Buttons -->
+    <div class="mt-6 space-y-3">
+      <button onclick="logout()" 
+              class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">Logout</button>
+      <button onclick="deleteAccount()" 
+              class="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800">Delete Account</button>
+    </div>
+  </div>
+
+  <style>
+    /* Toggle Switch Style */
+    .switch input:checked + .slider {
+      background-color: #4f46e5;
+    }
+    .slider.round:before {
+      position: absolute;
+      content: "";
+      height: 20px; width: 20px;
+      left: 4px; bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .4s;
+    }
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+  </style>
+
+  <script>
+    // Load user from localStorage
+    let isLoggedIn = localStorage.getItem("isLoggedIn");
+    let user = JSON.parse(localStorage.getItem("user"));
+
+    if(!isLoggedIn || !user){
+      alert("Please log in first!");
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("userName").textContent = user.name;
+      document.getElementById("userEmail").textContent = user.email;
+      if(user.image) document.getElementById("profileImage").src = user.image;
+    }
+
+    // Change Profile Picture
+    document.getElementById("uploadImage").addEventListener("change", function(e){
+      let file = e.target.files[0];
+      if(file){
+        let reader = new FileReader();
+        reader.onload = function(event){
+          document.getElementById("profileImage").src = event.target.result;
+          user.image = event.target.result;
+          localStorage.setItem("user", JSON.stringify(user));
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Edit Name/Email
+    document.getElementById("editForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      let newName = document.getElementById("editName").value;
+      let newEmail = document.getElementById("editEmail").value;
+
+      if(newName) user.name = newName;
+      if(newEmail) user.email = newEmail;
+
+      localStorage.setItem("user", JSON.stringify(user));
+
+      document.getElementById("userName").textContent = user.name;
+      document.getElementById("userEmail").textContent = user.email;
+
+      alert("Profile Updated!");
+    });
+
+    // Change Password
+    document.getElementById("passwordForm").addEventListener("submit", function(e){
+      e.preventDefault();
+      let oldPass = document.getElementById("oldPassword").value;
+      let newPass = document.getElementById("newPassword").value;
+
+      if(user.password !== oldPass){
+        alert("Old Password Incorrect!");
+        return;
+      }
+      user.password = newPass;
+      localStorage.setItem("user", JSON.stringify(user));
+      alert("Password Updated!");
+      document.getElementById("passwordForm").reset();
+    });
+
+    // Dark Mode Toggle
+    const body = document.getElementById("body");
+    const darkToggle = document.getElementById("darkToggle");
+
+    if(localStorage.getItem("darkMode") === "true"){
+      body.classList.add("dark","bg-gray-900");
+      darkToggle.checked = true;
+    }
+
+    darkToggle.addEventListener("change", () => {
+      if(darkToggle.checked){
+        body.classList.add("dark","bg-gray-900");
+        localStorage.setItem("darkMode", "true");
+      } else {
+        body.classList.remove("dark","bg-gray-900");
+        localStorage.setItem("darkMode", "false");
+      }
+    });
+
+    // Logout
+    function logout(){
+      localStorage.removeItem("isLoggedIn");
+      window.location.href = "login.html";
+    }
+
+    // Delete Account
+    function deleteAccount(){
+      if(confirm("Are you sure you want to delete your account? This cannot be undone.")){
+        localStorage.removeItem("user");
+        localStorage.removeItem("isLoggedIn");
+        alert("Account Deleted!");
+        window.location.href = "signup.html";
+      }
+    }
+  </script>
+
+</body>
+</html>
