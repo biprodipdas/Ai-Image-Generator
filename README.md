@@ -37,7 +37,7 @@ AI-IMAGE/
 
 ### 1️⃣ Clone the Repository
 ```bash
-git clone https://github.com/your-username/AI-IMAGE.git
+git clone https://github.com/biprodipdas/AI-IMAGE.git
 
 2️⃣ Open in Browser
 Simply open index2.html in your browser.
